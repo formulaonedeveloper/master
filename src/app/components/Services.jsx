@@ -1,6 +1,7 @@
 import React from 'react';
 import ServicesImg from '../assets/services.jpg';
 import Image from 'next/image';
+
 export default function Services() {
     return (
         <div className="Services py-10">
