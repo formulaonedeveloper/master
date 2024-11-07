@@ -1,7 +1,7 @@
 "use client";
 import React from 'react';
 import { motion } from 'framer-motion';
-import LottieHandler from './lottieHandler';
+import LottieHandler from './LottieHandler';
 
 export default function Hero() {
     // Define animation variants
