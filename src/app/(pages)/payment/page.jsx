@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from 'react';
 
-export default function Page() {
+const page = () => {
     const [paymentMethod, setPaymentMethod] = useState('creditCard');
 
     return (
@@ -136,3 +136,5 @@ export default function Page() {
         </div>
     );
 };
+
+export default page;

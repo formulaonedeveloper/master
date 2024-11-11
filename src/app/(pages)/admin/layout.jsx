@@ -13,11 +13,11 @@ import adminImg from "@/app/assets/admin.png";
 import Link from "next/link";
 import { Logout } from "@/app/services/authService";
 import toast from "react-hot-toast";
-import { redirect } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import NavDrobdown from "@/app/components/NavDrobdown";
 export default function Layout({ children }) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
+    const router = useRouter();
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
     };
@@ -25,7 +25,7 @@ export default function Layout({ children }) {
     const handleLogOut = () => {
         Logout();
         toast.success('Successfully logged out !');
-        redirect('/login')
+        router.push('/login')
     }
     return (
         <div className="admin_dashboard flex min-h-screen">
@@ -35,22 +35,24 @@ export default function Layout({ children }) {
                         } bg-white transition-all duration-300 ease-in-out border-r border-gray-300 z-50`}
                 >
                     <div className="flex items-center p-4">
-                        <div className="flex justify-center items-center w-12">
-                            <img
-                                src={logo.src}
-                                alt="Logo"
-                                className={`w-10 h-10 rounded-full ${!isSidebarOpen && "hidden"
-                                    } object-cover`}
-                            />
-                        </div>
-                        <span
-                            className={`text-black font-bold text-lg ml-3 ${!isSidebarOpen && "hidden"
-                                } whitespace-nowrap`}
-                        >
-                            Formula One
-                        </span>
+                        <Link href="/" className="flex items-center">
+                            <div className="flex justify-center items-center w-12">
+                                <img
+                                    src={logo.src}
+                                    alt="Logo"
+                                    className={`w-10 h-10 rounded-full ${!isSidebarOpen && "hidden"
+                                        } object-cover`}
+                                />
+                            </div>
+                            <span
+                                className={`text-black font-bold text-lg ml-3 ${!isSidebarOpen && "hidden"
+                                    } whitespace-nowrap`}
+                            >
+                                Formula One
+                            </span>
+                        </Link>
                         <div
-                            className={`ml-auto  top-1${!isSidebarOpen ? "absolute left-5" : "absolute right-4"
+                            className={`ml-auto  top-6 ${!isSidebarOpen ? " absolute left-5" : "absolute right-4"
                                 }`}
                         >
                             <BiMenu
