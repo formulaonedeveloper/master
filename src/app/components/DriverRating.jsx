@@ -7,12 +7,13 @@ import { db } from "@/app/firebase";
 const DriverRating = ({ onClose }) => {
     const [rating, setRating] = useState(0);
     const [message, setMessage] = useState("");
-    const [userId, setUserId] = useState("");
     const [users, setUsers] = useState({
         first_name: "",
         middle_name: "",
         type: "",
+        id: "",
     });
+    const [userId, setUserId] = useState(null);
 
     const handleRating = (rate) => {
         setRating(rate);
@@ -23,71 +24,70 @@ const DriverRating = ({ onClose }) => {
     };
 
     useEffect(() => {
-        // Get user ID from localStorage
-        const storedUserId = localStorage.getItem("user");
-        if (storedUserId) {
-            setUserId(storedUserId);
-        }
-    }, []);
-
-    useEffect(() => {
-        // Fetch user data if userId is available
-        const fetchUser = async () => {
-            if (!userId) return; // If no userId, return early
+        const fetchUser = async (IdUser) => {
+            if (!IdUser) {
+                console.error("No User ID found for fetching user data.");
+                return;
+            }
 
             try {
-                const docRef = doc(db, "users", userId);
+                const docRef = doc(db, "users", IdUser);
                 const docSnap = await getDoc(docRef);
 
                 if (docSnap.exists()) {
                     const userData = docSnap.data();
-                    setUsers({
-                        first_name: userData.first_name || "Unknown",
-                        middle_name: userData.middle_name || "Unknown",
-                        type: userData.type || "default", // Add a fallback value for type
-                    });
+                    setUsers((prevUsers) => ({
+                        ...prevUsers,
+                        ...userData,
+                    }));
                 } else {
-                    console.log("No such document!");
-                    toast.error("User data not found.");
+                    console.error(`User document with ID ${IdUser} does not exist.`);
                 }
             } catch (error) {
                 console.error("Error fetching user:", error);
-                toast.error("Error fetching user data.");
             }
         };
 
-        fetchUser();
-    }, [userId]); // Fetch data whenever the userId changes
+        if (userId) fetchUser(userId);
+    }, [userId]);
+
+    useEffect(() => {
+        const storedUserId = localStorage.getItem("IdUser");
+        if (storedUserId) {
+            setUserId(storedUserId);
+            setUsers((prevUsers) => ({ ...prevUsers, id: storedUserId }));
+        } else {
+            console.error("No User ID found in localStorage.");
+        }
+    }, []);
 
     const handleSubmit = async () => {
-        // Check if necessary fields are filled
-        if (!users.first_name || !users.middle_name || !users.type || rating === 0 || !message) {
-            toast.error("Please complete all fields before submitting your rating.");
+        if (!rating) {
+            toast.error("Please select a rating before submitting.");
             return;
         }
 
         const userData = {
-            name: `${users.first_name} ${users.middle_name}`,
+            name: `${users.first_name} ${users.middle_name}`.trim(),
             type: users.type,
             rating: rating.toString(),
             description: message,
-            gallery: "https://ibb.co/9bS9d6x", // Static gallery link (ensure it's correct)
-            createdAt: new Date().toISOString(),
-            id: userId,
+            gallery: "https://ibb.co/9bS9d6x",
+            createdAt: serverTimestamp(),
+            id: users.id,
         };
 
         try {
-            // Add data to Firestore collection
-            const docRef = await addDoc(collection(db, "ratings"), userData);
-            toast.success("Rating added successfully!");
+            const docRef = await addDoc(collection(db, "testimonials"), userData);
             console.log("Document written with ID: ", docRef.id);
-            onClose(); // Close the rating form after submission
-        } catch (e) {
-            console.error("Error adding document: ", e);
+            toast.success("Rating added successfully!");
+            onClose();
+            // console.log(userData);
+        } catch (error) {
+            console.error("Error adding document:", error);
             toast.error("An error occurred while submitting your rating.");
         }
-    };
-
+    }
     return (
         <div className="fixed inset-0 top-0 right-[-24px] bg-black bg-opacity-50 py-6 flex flex-col justify-center sm:py-12 z-50">
             <div className="py-3 sm:max-w-lg md:max-w-xl sm:mx-auto w-full">

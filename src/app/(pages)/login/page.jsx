@@ -6,13 +6,18 @@ import Link from 'next/link';
 import ImgLogin from '@/app/assets/login.jpg';
 import { Login } from '@/app/services/authService';
 import toast from 'react-hot-toast';
-import { useRouter } from 'next/navigation';
-
+import { useRouter, useSearchParams } from 'next/navigation';
+import { AiFillEye, AiFillEyeInvisible } from 'react-icons/ai';
 export default function Page() {
     const [error, setError] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const searchParams = useSearchParams();
 
+
+
+    console.log(searchParams.has("namePackage") && searchParams.has("pricePackage"));
     const router = useRouter();
     const validateEmail = (email) => {
         const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -29,23 +34,18 @@ export default function Page() {
             return;
         }
 
-
-        if (password.length < 6) {
-            setError('Password must be at least 6 characters long.');
-            toast.error('Password must be at least 6 characters long.');
-            return;
-        }
-
         setError('');
 
         try {
 
-
             await Login(email, password);
 
-
             toast.success('Successfully logged in!');
-            router.push('/');
+            if (searchParams.has("namePackage") && searchParams.has("pricePackage")) {
+                router.push(`/payment?namePackage=${searchParams.get("namePackage")}&pricePackage=${searchParams.get("pricePackage")}`);
+            } else {
+                router.push('/');
+            }
 
         } catch (error) {
 
@@ -53,7 +53,9 @@ export default function Page() {
             toast.error(error.message);
         }
     };
-
+    const togglePasswordVisibility = () => {
+        setShowPassword((prevState) => !prevState);
+    };
 
 
     return (
@@ -73,14 +75,25 @@ export default function Page() {
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
                                     />
-                                    <input
-                                        className="w-full px-8 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
-                                        type="password"
-                                        name="password"
-                                        placeholder="Password"
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                    />
+                                    <div className="relative w-full">
+                                        <input
+                                            className="w-full px-8 py-4 mb-3 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                                            type={showPassword ? 'text' : 'password'}
+                                            name="password"
+                                            placeholder="Password"
+                                            onChange={(e) => setPassword(e.target.value)}
+                                        />
+                                        <span
+                                            className="absolute right-3 top-3 cursor-pointer text-gray-500"
+                                            onClick={togglePasswordVisibility}
+                                        >
+                                            {showPassword ? (
+                                                <AiFillEyeInvisible size={24} />
+                                            ) : (
+                                                <AiFillEye size={24} />
+                                            )}
+                                        </span>
+                                    </div>
                                     {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
                                     <button type='submit' className="mt-5 tracking-wide font-semibold bg-indigo-500 text-gray-100 w-full py-4 rounded-lg hover:bg-indigo-700 transition-all duration-300 ease-in-out flex items-center justify-center focus:shadow-outline focus:outline-none">
                                         <svg
@@ -100,9 +113,9 @@ export default function Page() {
                                 </form>
                                 <p className="mt-6 text-xs text-gray-600 text-center">
                                     I agree to abide by templatana's
-                                    <a href="#" className="border-b border-gray-500 border-dotted"> Terms of Service </a>
+                                    <Link href="/PrivacyPolicy" className="border-b border-gray-500 border-dotted"> Terms of Service </Link>
                                     and its
-                                    <a href="#" className="border-b border-gray-500 border-dotted"> Privacy Policy </a>
+                                    <Link href="/PrivacyPolicy" className="border-b border-gray-500 border-dotted"> Privacy Policy </Link>
                                 </p>
                                 <p className="mt-8 text-md text-gray-600 text-center">
                                     Don't have an account?
